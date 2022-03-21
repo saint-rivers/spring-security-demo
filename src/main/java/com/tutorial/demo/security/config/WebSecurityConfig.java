@@ -61,10 +61,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      * @see BCryptPasswordEncoder
      */
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) {
-        auth.authenticationProvider(daoAuthenticationProvider());
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+//        auth.authenticationProvider(daoAuthenticationProvider());
 //        you could also remove the daoAuthenticationProvider bean and just use the code below to set the beans instead
-//        auth.userDetailsService(appUserService).passwordEncoder(bCryptPasswordEncoder);
+        auth.userDetailsService(appUserService).passwordEncoder(bCryptPasswordEncoder);
     }
 
     /**
@@ -83,11 +83,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      * specifies what password encoder to use <br>
      * and what service to use to fetch users from the database
      */
-    @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setPasswordEncoder(bCryptPasswordEncoder);
-        provider.setUserDetailsService(appUserService);
-        return provider;
-    }
+//    @Bean
+//    public DaoAuthenticationProvider daoAuthenticationProvider() {
+//        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+//        provider.setPasswordEncoder(bCryptPasswordEncoder);
+//        provider.setUserDetailsService(appUserService);
+//        return provider;
+//    }
 }
