@@ -5,7 +5,7 @@ spring:
     password: password
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
 #    show-sql: true
     properties:
       hibernate:
@@ -35,3 +35,5 @@ spring:
 #      connectiontimeoutL: 5000
 #      timeout: 3000
 #      writetimeout: 5000
+jwt:
+  secret: javainuse

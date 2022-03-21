@@ -3,11 +3,11 @@ POST http://localhost:8080/api/v1/auth
 Content-Type: application/json
 
 {
-  "firstname": "jon",
-  "lastname": "snow",
-  "email": "js@gmail.com",
+  "firstname": "eam",
+  "lastname": "dayan",
+  "email": "eam.dayan@gmail.com",
   "password": "asd"
 }
 
 ###
-POST http://localhost:8080/api/v1/auth/confirm?token=8eb69636-f821-472e-a7ce-b6483d696678
+GET http://localhost:8080/api/v1/auth/confirm?token=c1bda6f2-5bd0-49cc-b7d8-86084fa65d3c
