@@ -1,9 +1,6 @@
 package com.tutorial.demo.appuser;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -12,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
+@Builder
 @Getter
 @Setter
 @AllArgsConstructor
@@ -35,7 +33,7 @@ public class AppUser implements UserDetails {
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "password", nullable = false)
+    @Column(name = "password")
     private String password;
 
     @Column(name = "is_locked", nullable = false)
@@ -46,6 +44,9 @@ public class AppUser implements UserDetails {
 
     @Enumerated(value = EnumType.STRING)
     private UserRole userRole;
+
+    @Enumerated(value = EnumType.STRING)
+    private Provider provider;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

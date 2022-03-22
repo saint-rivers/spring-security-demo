@@ -7,9 +7,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,6 +26,9 @@ public class AppUserService implements UserDetailsService {
         return appUserRepository.findByEmail(s).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
+    /**
+     * This method saves a user into a database during his registration request
+     */
     public String saveUserIntoDatabase(AppUser appUser) {
         boolean userExists = appUserRepository.findByEmail(appUser.getEmail())
                 .isPresent();
@@ -49,7 +54,7 @@ public class AppUserService implements UserDetailsService {
         return token;
     }
 
-    private AppUser findUserByEmail(String email){
+    private AppUser findUserByEmail(String email) {
         return appUserRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
@@ -57,5 +62,26 @@ public class AppUserService implements UserDetailsService {
         AppUser appUser = this.findUserByEmail(email);
         appUser.setIsEnabled(true);
         appUserRepository.save(appUser);
+    }
+
+    /**
+     * This method saves a user after their login with OAuth2
+     * @param oAuth2User Principal gotten from WebSecurityConfig
+     * @see com.tutorial.demo.security.config.WebSecurityConfig
+     */
+    public void processOAuthPostLogin(DefaultOidcUser oAuth2User) {
+        Optional<AppUser> appUser = appUserRepository.findByEmail(oAuth2User.getEmail());
+        if (appUser.isEmpty()) {
+            AppUser user = AppUser.builder()
+                    .email(oAuth2User.getEmail())
+                    .firstname(oAuth2User.getGivenName())
+                    .lastname(oAuth2User.getFamilyName())
+                    .isEnabled(true)
+                    .isLocked(false)
+                    .userRole(UserRole.USER)
+                    .provider(Provider.GOOGLE)
+                    .build();
+            appUserRepository.save(user);
+        }
     }
 }

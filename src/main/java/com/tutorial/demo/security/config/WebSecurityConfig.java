@@ -3,6 +3,8 @@ package com.tutorial.demo.security.config;
 import com.tutorial.demo.appuser.AppUserService;
 import com.tutorial.demo.security.jwt.JwtAuthenticationEntryPoint;
 import com.tutorial.demo.security.jwt.JwtRequestFilter;
+import com.tutorial.demo.security.oauth2.OAuth2AppUser;
+import com.tutorial.demo.security.oauth2.OAuth2AppUserService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,8 +17,16 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Configuration
 @AllArgsConstructor
@@ -28,6 +38,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtRequestFilter jwtRequestFilter;
+    private final OAuth2AppUserService oAuth2AppUserService;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -43,19 +54,31 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
 
                 // login form
-                .formLogin()
-                .and()
-                .oauth2Login()
+//                .formLogin()
+//                .and()
+//                .oauth2Login()
 
                 // add exception handling here
 //                .and()
-//                .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
 //                .and()
 //                .sessionManagement()
 //                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
                 .and()
                 .csrf().disable()
+
+                .oauth2Login()
+//                .loginPage("/login-me")
+                .userInfoEndpoint()
+                .userService(oAuth2AppUserService)
+                .and()
+                .successHandler((request, response, authentication) -> {
+                    DefaultOidcUser oAuth2AppUser = (DefaultOidcUser) authentication.getPrincipal();
+                    appUserService.processOAuthPostLogin(oAuth2AppUser);
+                    // redirect to a thymeleaf page that shows all users
+                    response.sendRedirect("/success");
+                })
         ;
 
         // add jwt filter
@@ -101,7 +124,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //        provider.setUserDetailsService(appUserService);
 //        return provider;
 //    }
-
     @Override
     public void configure(WebSecurity web) {
         web.ignoring().antMatchers("/resources/**");

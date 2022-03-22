@@ -2,6 +2,7 @@ package com.tutorial.demo.registration;
 
 import com.tutorial.demo.appuser.AppUser;
 import com.tutorial.demo.appuser.AppUserService;
+import com.tutorial.demo.appuser.Provider;
 import com.tutorial.demo.appuser.UserRole;
 import com.tutorial.demo.email.EmailSender;
 import com.tutorial.demo.registration.token.ConfirmationToken;
@@ -31,6 +32,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
         AppUser appUser = modelMapper.map(request, AppUser.class);
         appUser.setUserRole(UserRole.USER);
+        appUser.setProvider(Provider.LOCAL);
 
         String token = appUserService.saveUserIntoDatabase(appUser);
         String link = "http://localhost:8080/api/v1/registration/confirm?token=" + token;
