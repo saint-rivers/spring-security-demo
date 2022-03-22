@@ -34,6 +34,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         String token = appUserService.saveUserIntoDatabase(appUser);
         String link = "http://localhost:8080/api/v1/registration/confirm?token=" + token;
+        // disabled for now, for convenience
         emailSender.send(
                 request.getEmail(),
                 buildEmail(request.getFirstname(), link)

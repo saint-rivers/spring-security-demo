@@ -38,7 +38,6 @@ public class RegistrationController {
     }
 
     @PostMapping("/login")
-    @CrossOrigin(origins = {"http://localhost:4200/"})
     public ResponseEntity<JwtResponse> userLogin(@RequestBody JwtRequest jwtRequest) throws Exception {
         log.info("user login: {}", jwtRequest.getEmail());
         authenticate(jwtRequest.getEmail(), jwtRequest.getPassword());

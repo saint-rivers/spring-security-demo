@@ -16,11 +16,15 @@ public class ApplicationStart implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-//        String token = registrationController.register(new RegistrationRequest("dayan", "eam", "eam.dayan@gmail.com", "asd"));
-//        log.info("Token: {}", token);
-//        log.info("Awaiting confirmation");
-//        Thread.sleep(2000);
-//        String message = registrationController.confirmToken(token);
-//        log.info("Message: {}", message);
+        initializeDefaultUser();
     }
+
+    private void initializeDefaultUser() {
+        String token = registrationController.register(new RegistrationRequest("dayan", "eam", "eam.dayan@gmail.com", "asd"));
+        log.info("Token: {}", token);
+        log.info("Awaiting confirmation");
+        String message = registrationController.confirmToken(token);
+        log.info("Message: {}", message);
+    }
+
 }
