@@ -18,6 +18,7 @@ import java.util.UUID;
 @Table(name = "app_users", uniqueConstraints = {
         @UniqueConstraint(columnNames = "email", name = "unique_email")
 })
+@ToString
 public class AppUser implements UserDetails {
 
     @Id

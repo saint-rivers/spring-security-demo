@@ -2,6 +2,8 @@ package com.tutorial.demo.appuser;
 
 import com.tutorial.demo.registration.token.ConfirmationToken;
 import com.tutorial.demo.registration.token.ConfirmationTokenServiceImpl;
+import com.tutorial.demo.security.oauth2.OAuth2AppUser;
+import com.tutorial.demo.security.oauth2.TmpOAuth2User;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,6 +13,7 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -66,6 +69,7 @@ public class AppUserService implements UserDetailsService {
 
     /**
      * This method saves a user after their login with OAuth2
+     *
      * @param oAuth2User Principal gotten from WebSecurityConfig
      * @see com.tutorial.demo.security.config.WebSecurityConfig
      */
@@ -79,9 +83,35 @@ public class AppUserService implements UserDetailsService {
                     .isEnabled(true)
                     .isLocked(false)
                     .userRole(UserRole.USER)
+                    // todo: properly get GOOGLE as the OAuth2ClientName
                     .provider(Provider.GOOGLE)
                     .build();
             appUserRepository.save(user);
         }
+    }
+
+    public void processOAuthPostLogin(OAuth2AppUser oAuth2User) {
+        Optional<AppUser> appUser = appUserRepository.findByEmail(oAuth2User.getEmail());
+        if (appUser.isEmpty()) {
+            AppUser user = AppUser.builder()
+                    .email(oAuth2User.getEmail())
+                    .firstname(oAuth2User.getAttribute("first_name"))
+                    .lastname(oAuth2User.getAttribute("last_name"))
+                    .isEnabled(true)
+                    .isLocked(false)
+                    .userRole(UserRole.USER)
+                    .provider(getProviderName(oAuth2User.getOAuth2ClientName()))
+                    .build();
+            System.out.println("priniting facebook oauth user " + user.toString());
+            appUserRepository.save(user);
+        }
+    }
+
+    private Provider getProviderName(String clientName) {
+        return clientName.toLowerCase(Locale.ROOT).equals(Provider.GOOGLE.toString().toLowerCase(Locale.ROOT))
+                ? Provider.GOOGLE
+                : clientName.toLowerCase(Locale.ROOT).equals(Provider.FACEBOOK.toString().toLowerCase(Locale.ROOT))
+                    ? Provider.FACEBOOK
+                    : null;
     }
 }

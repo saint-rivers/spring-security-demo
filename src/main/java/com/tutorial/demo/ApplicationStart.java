@@ -16,7 +16,7 @@ public class ApplicationStart implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        initializeDefaultUser();
+//        initializeDefaultUser();
     }
 
     private void initializeDefaultUser() {

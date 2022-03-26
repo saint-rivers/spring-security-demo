@@ -20,6 +20,7 @@ spring:
           facebook:
             client-id: ${FACEBOOK_CLIENT_ID}
             client-secret: ${FACEBOOK_CLIENT_SECRET}
+#            redirectUri: http://localhost:8080/oauth2/authorization/facebook # Note that facebook now mandates the use of https redirect URIs, so make sure your app supports https in production
             scope:
               - email
               - public_profile
@@ -27,7 +28,7 @@ spring:
           facebook:
             authorizationUri: https://www.facebook.com/v3.0/dialog/oauth
             tokenUri: https://graph.facebook.com/v3.0/oauth/access_token
-            userInfoUri: https://graph.facebook.com/v3.0/me?fields=id,first_name,last_name,email,picture.width(250).height(250)
+            userInfoUri: https://graph.facebook.com/v3.0/me?fields=id,name,first_name,last_name,email,picture.width(250).height(250)
   #        format_sql: true
 
   mail:

@@ -5,6 +5,7 @@ import com.tutorial.demo.security.jwt.JwtAuthenticationEntryPoint;
 import com.tutorial.demo.security.jwt.JwtRequestFilter;
 import com.tutorial.demo.security.oauth2.OAuth2AppUser;
 import com.tutorial.demo.security.oauth2.OAuth2AppUserService;
+import com.tutorial.demo.security.oauth2.TmpOAuth2User;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,10 +17,14 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -27,6 +32,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collection;
 
 @Configuration
 @AllArgsConstructor
@@ -47,6 +53,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/v*/auth/**").permitAll()
                 .antMatchers("/login**").permitAll()
+                .antMatchers("/oauth**").permitAll()
+                .antMatchers("/", "/login**", "/callback/", "/webjars/**", "/error**").permitAll()
 
                 // all authenticated paths must go through this
                 .anyRequest()
@@ -69,13 +77,25 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
 
                 .oauth2Login()
-//                .loginPage("/login-me")
+                .loginPage("/login-me")
                 .userInfoEndpoint()
                 .userService(oAuth2AppUserService)
+
                 .and()
+
                 .successHandler((request, response, authentication) -> {
-                    DefaultOidcUser oAuth2AppUser = (DefaultOidcUser) authentication.getPrincipal();
-                    appUserService.processOAuthPostLogin(oAuth2AppUser);
+                    try {
+                        DefaultOidcUser oAuth2AppUser = (DefaultOidcUser) authentication.getPrincipal();
+                        appUserService.processOAuthPostLogin(oAuth2AppUser);
+                    } catch (ClassCastException e) {
+                        try {
+                            OAuth2AppUser oAuth2AppUser = (OAuth2AppUser) authentication.getPrincipal();
+                            System.out.println("websecurityconfig "+oAuth2AppUser.getOAuth2ClientName());
+                            appUserService.processOAuthPostLogin(oAuth2AppUser);
+                        } catch (ClassCastException ex) {
+                            throw new ClassCastException(ex.getMessage());
+                        }
+                    }
                     // redirect to a thymeleaf page that shows all users
                     response.sendRedirect("/success");
                 })
